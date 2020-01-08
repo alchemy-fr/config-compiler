@@ -1,0 +1,22 @@
+{
+  "name": "generate-env",
+  "version": "1.0.0",
+  "description": "Compile configuration from JSON files using a script file.",
+  "main": "index.js",
+  "scripts": {
+    "compile-linux": "pkg --targets=node10-linux-x64 -o generate-env-linux --config package.json index.js",
+    "compile-alpine": "pkg --targets=node10-alpine-x64 -o generate-env-alpine --config package.json index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^3.0.0",
+    "glob": "^7.1.6",
+    "minimist": "^1.2.0"
+  },
+  "pkg": {
+    "scripts": "**/config-compiler.js",
+    "assets": "**/config-compiler.js"
+  }
+}
