@@ -64,3 +64,64 @@ window.config={
   "isDev": true
 };
 ```
+
+## Append custom script
+
+You can return the magic key `customHTML` node as follows:
+```js
+// config-compiler.js
+(function (config, env) {
+    return {
+        customHTML: {
+            __TPL_HEAD__: `<script>alert("Script executed in env: {env}");</script>`.replace(/{env}/g, env.APP_ENV),
+        },
+        foo: config.namespace_foo,
+        isDev: env.APP_ENV === 'dev',
+        scriptHeadContents: scriptTpl.replace(/\{env\}/g, env.APP_ENV),
+    };
+});
+```
+
+And in the HTML template file:
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <script src="%PUBLIC_URL%/env-config.__TPL_HASH__.js"></script>
+    __TPL_HEAD__
+  </head>
+  <body>
+  </body>
+</html>
+```
+
+This will produce this HTML file:
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <script src="/env-config.9T9esB0tcmbRstmRIDQH.js"></script>
+    <script>alert("Script executed in env: dev");</script>
+  </head>
+  <body>
+  </body>
+</html>
+```
+
+Of course you can add as variables as you want:
+```js
+// config-compiler.js
+(function (config, env) {
+    return {
+        customHTML: {
+            __TPL_HEAD__: `<script>alert("Script executed in env: {env}");</script>`.replace(/{env}/g, env.APP_ENV),
+            __TPL_BODY_1__: `<div>:)</div>`,
+            __TPL_BODY_2__: `<div>:(</div>`,
+        },
+    };
+});
+```
+
+Don't forget to place the `__TPL_BODY_1__` and `__TPL_BODY_2__` text in the right place of your template.

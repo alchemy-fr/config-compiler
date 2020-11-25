@@ -41,6 +41,12 @@ function main() {
 
         config = compiler(config, process.env);
 
+        let customHTML = {};
+        if (config.customHTML) {
+            customHTML = {...config.customHTML};
+            delete config.customHTML;
+        }
+
         console.info(chalk.yellow(`
 ############################################
 # The following configuration will be      #
@@ -67,7 +73,12 @@ function main() {
         fs.readFile(tplSrc, 'utf8', function (err, data) {
             err && error(err);
 
-            fs.writeFileSync(indexSrc, data.replace('__TPL_HASH__', md5sum));
+            let d = data.replace('__TPL_HASH__', md5sum);
+            Object.keys(customHTML).forEach(k => {
+                d = d.replace(k, customHTML[k]);
+            });
+
+            fs.writeFileSync(indexSrc, d);
             console.log(chalk.green(`[OK] ${indexSrc} written`));
         });
     });
