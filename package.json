@@ -1,6 +1,6 @@
 {
   "name": "generate-env",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Compile configuration from JSON files using a script file.",
   "main": "index.js",
   "scripts": {

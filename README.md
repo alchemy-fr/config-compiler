@@ -43,7 +43,7 @@ Given the following 2 files:
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <script src="%PUBLIC_URL%/env-config.__TPL_HASH__.js"></script>
+    __TPL_CONFIG__
   </head>
   <body>
   </body>
@@ -57,12 +57,17 @@ Run:
 
 This will produce the following config:
 
-`env-config.67b9814ff23399dee06b6293a0bf4618.js`
-```js
-window.config={
-  "foo": "bar",
-  "isDev": true
-};
+`index.html`
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <script>window.config={"foo": "bar","isDev": true};</script>
+  </head>
+  <body>
+  </body>
+</html>
 ```
 
 ## Append custom script
@@ -88,7 +93,7 @@ And in the HTML template file:
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <script src="%PUBLIC_URL%/env-config.__TPL_HASH__.js"></script>
+    __TPL_CONFIG__
     __TPL_HEAD__
   </head>
   <body>

@@ -3,7 +3,6 @@ function main() {
     const fs = require('fs');
     const path = require('path');
     const glob = require('glob');
-    const crypto = require('crypto');
     const chalk = require('chalk');
 
     function error(err, exitCode = 1) {
@@ -54,26 +53,20 @@ function main() {
 # Please review there is no sensible data: #
 ############################################
 `), JSON.stringify(config, null, 2));
-
         const data = JSON.stringify(config);
-        const md5sum = crypto.createHash('md5').update(data).digest('hex');
-        const compiled = `window.config=${data};\n`;
+        const compiled = `<script>window.config=${data};</script>`;
         const indexSrc = `${dir}/index.html`;
         const tplSrc = `${dir}/index.tpl.html`;
-        const outputConfig = `${dir}/env-config.${md5sum}.js`;
 
         if (!fs.existsSync(tplSrc)) {
             fs.copyFileSync(indexSrc, tplSrc);
             console.log(chalk.green(`[OK] ${indexSrc} copied into ${tplSrc}`));
         }
 
-        fs.writeFileSync(outputConfig, compiled);
-        console.log(chalk.green(`[OK] ${outputConfig} written`));
-
         fs.readFile(tplSrc, 'utf8', function (err, data) {
             err && error(err);
 
-            let d = data.replace('__TPL_HASH__', md5sum);
+            let d = data.replace('__TPL_CONFIG__', compiled);
             Object.keys(customHTML).forEach(k => {
                 d = d.replace(k, customHTML[k]);
             });
