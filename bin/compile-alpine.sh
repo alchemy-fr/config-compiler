@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e
+set -ex
 
 IMAGE_TAG="config-compiler-builder-alpine:latest"
 CONTAINER_NAME="config-compiler-build-alpine"
