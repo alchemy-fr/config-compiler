@@ -8,6 +8,8 @@ jobs:
     name: "Pre Release"
     runs-on: "ubuntu-latest"
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
       - name: "Build"
         run: |
           bin/compile-alpine.sh
