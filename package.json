@@ -4,8 +4,8 @@
   "description": "Compile configuration from JSON files using a script file.",
   "main": "index.js",
   "scripts": {
-    "compile-linux": "pkg --targets=node10-linux-x64 -o generate-env-linux --config package.json index.js && chmod +x generate-env-linux",
-    "compile-alpine": "pkg --targets=node10-alpine-x64 -o generate-env-alpine --config package.json index.js && chmod +x generate-env-alpine",
+    "compile-linux": "pkg --targets=node10-linux-x64 -o builds/generate-env-linux --config package.json index.js && chmod +x builds/generate-env-linux",
+    "compile-alpine": "pkg --targets=node10-alpine-x64 -o builds/generate-env-alpine --config package.json index.js && chmod +x builds/generate-env-alpine",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

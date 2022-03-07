@@ -10,4 +10,10 @@ RUN npm install -g pkg \
 
 USER node
 
+VOLUME /home/node/builds
+
+COPY --chown=node:node . .
+
+RUN yarn install
+
 CMD npm run compile-alpine

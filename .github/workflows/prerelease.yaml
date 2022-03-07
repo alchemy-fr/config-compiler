@@ -20,4 +20,4 @@ jobs:
           prerelease: true
           title: "Development Build"
           files: |
-            generate-env-alpine
+            builds/generate-env-alpine
