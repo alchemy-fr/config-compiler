@@ -10,10 +10,7 @@ docker build -t "${IMAGE_TAG}" .
 docker rm -f "${CONTAINER_NAME}"
 docker run --name "${CONTAINER_NAME}" "${IMAGE_TAG}"
 
-pwd
-
-ls -la
-mkdir ./build
+mkdir -p ./build
 
 docker cp "${CONTAINER_NAME}:/home/node/build/generate-env-alpine" ./build/generate-env-alpine
 
