@@ -13,7 +13,7 @@
   "dependencies": {
     "chalk": "^3.0.0",
     "glob": "^7.1.6",
-    "minimist": "^1.2.3"
+    "minimist": "^1.2.6"
   },
   "pkg": {
     "scripts": "**/config-compiler.js",
