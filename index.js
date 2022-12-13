@@ -54,7 +54,9 @@ function main() {
 ############################################
 `), JSON.stringify(config, null, 2));
         const data = JSON.stringify(config);
-        const compiled = `<script>window.config=${data};</script>`;
+
+        const scriptNonce = process.env.CONFIG_NONCE;
+        const compiled = `<script${scriptNonce ? ` nonce="${scriptNonce}"` : ''}>window.config=${data};</script>`;
         const indexSrc = `${dir}/index.html`;
         const tplSrc = `${dir}/index.tpl.html`;
 
