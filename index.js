@@ -54,7 +54,7 @@ function main() {
 ############################################
 `), JSON.stringify(config, null, 2));
         const data = JSON.stringify(config);
-        const compiled = `<script>window.config=${data};</script>`;
+        const compiled = `<script nonce="${process.env.CONFIG_NONCE || 'SoAGRuE8'}">window.config=${data};</script>`;
         const indexSrc = `${dir}/index.html`;
         const tplSrc = `${dir}/index.tpl.html`;
 
