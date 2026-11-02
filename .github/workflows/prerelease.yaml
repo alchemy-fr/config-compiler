@@ -3,21 +3,30 @@ on:
   push:
     branches:
       - "master"
+permissions:
+  contents: read
 jobs:
   pre-release:
     name: "Pre Release"
     runs-on: "ubuntu-latest"
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: "Build"
         run: |
           bin/compile-alpine.sh
-      - uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
-          prerelease: true
-          title: "Development Build"
-          files: |
+      - name: "Publish"
+        env:
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GH_REPO: "${{ github.repository }}"
+        run: |
+          gh release delete latest --cleanup-tag --yes || true
+          gh release create latest \
+            --prerelease \
+            --title "Development Build" \
+            --target "${GITHUB_SHA}" \
             build/generate-env-alpine

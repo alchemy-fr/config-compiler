@@ -1,4 +1,2 @@
-/generate-env-*
+/build
 /node_modules
-/.pkg-cache
-/.config

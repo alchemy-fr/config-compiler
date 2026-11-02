@@ -1,17 +1,17 @@
-FROM node:20.3.0-alpine3.17
+FROM node:26.13.0-alpine3.24 AS build
 
 WORKDIR /home/node
 
-RUN npm install -g pkg \
-    # Pre download Node.js binaries
-    && touch index.js \
-    && pkg --target=node18-alpine-x64 index.js \
-    && rm index*
-
 USER node
 
-COPY --chown=node:node . .
+COPY --chown=node:node package.json package-lock.json ./
 
-RUN yarn install
+RUN npm ci --ignore-scripts
 
-CMD npm run compile-alpine
+COPY --chown=node:node index.js ./
+
+RUN npm run compile-alpine
+
+FROM scratch AS export
+
+COPY --from=build /home/node/build/generate-env-alpine /

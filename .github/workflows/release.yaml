@@ -3,19 +3,27 @@ on:
   push:
     tags:
       - "v*.*.*"
+permissions:
+  contents: read
 jobs:
   tagged-release:
     name: "Tagged Release"
     runs-on: "ubuntu-latest"
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-      - name: "Build & test"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: "Build"
         run: |
           bin/compile-alpine.sh
-      - uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: false
-          files: |
+      - name: "Publish"
+        env:
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GH_REPO: "${{ github.repository }}"
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --generate-notes \
             build/generate-env-alpine

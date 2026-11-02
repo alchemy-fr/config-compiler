@@ -1,16 +1,32 @@
+const fs = require('fs');
+const path = require('path');
+const {parseArgs, styleText} = require('util');
+
+const configFile = '/configs/config.json';
+
+function error(err, exitCode = 1) {
+    console.error(styleText('red', `generate-env error: ${err}`));
+    process.exit(exitCode);
+}
+
+// Makes the JSON safe to inline in a <script> element: "</script>" or "<!--" in a value
+// would otherwise break out of the script context.
+function toInlineScriptJson(value) {
+    return JSON.stringify(value)
+        .replace(/</g, '\\u003c')
+        .replace(/>/g, '\\u003e')
+        .replace(/&/g, '\\u0026');
+}
+
+// Direct eval keeps `require` in scope: compilers use it to read files such as the stack config.
+function loadCompiler(src) {
+    return eval(src);
+}
+
 function main() {
-    const argv = require('minimist')(process.argv.slice(2));
-    const fs = require('fs');
-    const path = require('path');
-    const glob = require('glob');
-    const chalk = require('chalk');
+    const {positionals} = parseArgs({strict: false, allowPositionals: true});
 
-    function error(err, exitCode = 1) {
-        console.error(chalk.red(`generate-env error: ${err}`));
-        process.exit(exitCode);
-    }
-
-    const dirArg = argv._[0];
+    const dirArg = positionals[0];
     if (!dirArg) {
         error('Missing directory argument');
     }
@@ -18,65 +34,61 @@ function main() {
     try {
         dir = fs.realpathSync(path.join(process.cwd(), dirArg));
     } catch (e) {
-        error(`Directory "${path.join(process.cwd(), dirArg)}" does not exists`);
+        error(`Directory "${path.join(process.cwd(), dirArg)}" does not exist`);
     }
 
     const compilerSrc = `${process.cwd()}/config-compiler.js`;
+    if (!fs.existsSync(compilerSrc)) {
+        console.warn(styleText('yellow', `No config compiler file found. (Looked at ${compilerSrc})`));
+        return;
+    }
+
+    const compiler = loadCompiler(fs.readFileSync(compilerSrc, 'utf-8'));
+    console.info(styleText('cyan', `Loading compiler at "${compilerSrc}"`));
+
     let config = {};
+    if (fs.existsSync(configFile)) {
+        config = JSON.parse(fs.readFileSync(configFile, 'utf-8'));
+    }
 
-    glob('/configs/config.json', function (er, files) {
-        if (!fs.existsSync(compilerSrc)) {
-            console.warn(chalk.yellow(`No config compiler file found. (Looked at ${compilerSrc})`));
-            return;
-        }
+    config = compiler(config, process.env);
 
-        const compiler = eval(fs.readFileSync(compilerSrc, 'utf-8'));
-        console.info(chalk.cyan(`Loading compiler at "${compilerSrc}"`));
+    let customHTML = {};
+    if (config.customHTML) {
+        customHTML = {...config.customHTML};
+        delete config.customHTML;
+    }
 
-        files.forEach(f => {
-            const contents = fs.readFileSync(f);
-            config = Object.assign(config, JSON.parse(contents));
-        });
-
-        config = compiler(config, process.env);
-
-        let customHTML = {};
-        if (config.customHTML) {
-            customHTML = {...config.customHTML};
-            delete config.customHTML;
-        }
-
-        console.info(chalk.yellow(`
+    console.info(styleText('yellow', `
 ############################################
 # The following configuration will be      #
 # exposed publicly by the client.          #
 # Please review there is no sensible data: #
 ############################################
 `), JSON.stringify(config, null, 2));
-        const data = JSON.stringify(config);
 
-        const scriptNonce = process.env.CONFIG_NONCE;
-        const compiled = `<script${scriptNonce ? ` nonce="${scriptNonce}"` : ''}>window.config=${data};</script>`;
-        const indexSrc = `${dir}/index.html`;
-        const tplSrc = `${dir}/index.tpl.html`;
+    const scriptNonce = process.env.CONFIG_NONCE;
+    if (scriptNonce && !/^[A-Za-z0-9+/_=-]+$/.test(scriptNonce)) {
+        error('CONFIG_NONCE must be a base64 value');
+    }
+    const compiled = `<script${scriptNonce ? ` nonce="${scriptNonce}"` : ''}>window.config=${toInlineScriptJson(config)};</script>`;
+    const indexSrc = `${dir}/index.html`;
+    const tplSrc = `${dir}/index.tpl.html`;
 
-        if (!fs.existsSync(tplSrc)) {
-            fs.copyFileSync(indexSrc, tplSrc);
-            console.log(chalk.green(`[OK] ${indexSrc} copied into ${tplSrc}`));
-        }
+    if (!fs.existsSync(tplSrc)) {
+        fs.copyFileSync(indexSrc, tplSrc);
+        console.log(styleText('green', `[OK] ${indexSrc} copied into ${tplSrc}`));
+    }
 
-        fs.readFile(tplSrc, 'utf8', function (err, data) {
-            err && error(err);
-
-            let d = data.replace('__TPL_CONFIG__', compiled);
-            Object.keys(customHTML).forEach(k => {
-                d = d.replace(k, customHTML[k]);
-            });
-
-            fs.writeFileSync(indexSrc, d);
-            console.log(chalk.green(`[OK] ${indexSrc} written`));
-        });
+    // Replacements are passed as functions so that "$&", "$'"... in values are not
+    // interpreted as replacement patterns.
+    let html = fs.readFileSync(tplSrc, 'utf8').replace('__TPL_CONFIG__', () => compiled);
+    Object.keys(customHTML).forEach(k => {
+        html = html.replace(k, () => customHTML[k]);
     });
+
+    fs.writeFileSync(indexSrc, html);
+    console.log(styleText('green', `[OK] ${indexSrc} written`));
 }
 
 main();

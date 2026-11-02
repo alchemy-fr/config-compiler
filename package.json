@@ -3,20 +3,14 @@
   "version": "2.1.1",
   "description": "Compile configuration from JSON files using a script file.",
   "main": "index.js",
+  "private": true,
   "scripts": {
-    "compile-linux": "pkg --targets=node18-linux-x64 -o build/generate-env-linux --config package.json index.js && chmod +x build/generate-env-linux",
-    "compile-alpine": "pkg --targets=node18-alpine-x64 -o build/generate-env-alpine --config package.json index.js && chmod +x build/generate-env-alpine",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "compile-linux": "pkg --targets=node26-linux-x64 -o build/generate-env-linux index.js",
+    "compile-alpine": "pkg --targets=node26-alpine-x64 -o build/generate-env-alpine index.js"
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "chalk": "^3.0.0",
-    "glob": "^7.1.6",
-    "minimist": "^1.2.3"
-  },
-  "pkg": {
-    "scripts": "**/config-compiler.js",
-    "assets": "**/config-compiler.js"
+  "devDependencies": {
+    "@yao-pkg/pkg": "6.24.0"
   }
 }
